@@ -1,692 +1,628 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farm Empire Game</title>
+    <title>Farm Empire - Build Your Agricultural Empire</title>
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Farm Empire - Build Your Agricultural Empire">
+    <meta property="og:description" content="Start with a small plot and build a massive farming empire. Buy vehicles, hire workers, raise animals, and harvest 5 different crops to expand your farmland.">
+    <meta property="og:url" content="https://www.onspace.ai">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="OnSpace.AI">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=630&fit=crop">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Farm Empire - Build Your Agricultural Empire">
+    <meta name="twitter:description" content="Start with a small plot and build a massive farming empire. Buy vehicles, hire workers, raise animals, and harvest 5 different crops to expand your farmland.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=630&fit=crop">
+    <meta name="twitter:url" content="https://www.onspace.ai">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
         }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to bottom, #87CEEB 0%, #98D8C8 100%);
-            padding: 20px;
-            min-height: 100vh;
+        @keyframes drive {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(100%); }
         }
-
-        .game-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        .float { animation: float 2s ease-in-out infinite; }
+        .plot-3d {
+            transform: perspective(800px) rotateX(45deg);
+            transform-style: preserve-3d;
         }
-
-        h1 {
-            text-align: center;
-            color: #2c5f2d;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .stats-bar {
-            display: flex;
-            justify-content: space-around;
-            background: linear-gradient(135deg, #2c5f2d 0%, #4a8f4d 100%);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            color: white;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-
-        .farm-area {
-            background: #8B7355;
-            padding: 20px;
-            border-radius: 10px;
-            border: 4px solid #654321;
-        }
-
-        .plots-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .plot {
-            aspect-ratio: 1;
-            background: #654321;
-            border: 3px solid #4a3621;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .plot:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .plot.empty {
-            background: #654321;
-        }
-
-        .plot.planted {
-            background: #8B4513;
-        }
-
-        .plot.ready {
-            background: #228B22;
-            animation: glow 1.5s infinite;
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 10px #90EE90; }
-            50% { box-shadow: 0 0 20px #90EE90; }
-        }
-
-        .crop-icon {
-            font-size: 2em;
-            margin-bottom: 5px;
-        }
-
-        .progress-bar {
-            width: 80%;
-            height: 8px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            transition: width 0.3s;
-        }
-
-        .side-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .panel-section {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            border: 2px solid #ddd;
-        }
-
-        .panel-section h2 {
-            color: #2c5f2d;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-            border-bottom: 2px solid #4a8f4d;
-            padding-bottom: 8px;
-        }
-
-        .crop-select {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .crop-btn {
-            padding: 12px;
-            border: 2px solid #4a8f4d;
-            background: linear-gradient(135deg, #f0f9f0, #e0f0e0);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9em;
-            text-align: center;
-        }
-
-        .crop-btn:hover {
-            background: linear-gradient(135deg, #4a8f4d, #2c5f2d);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .crop-btn.selected {
-            background: linear-gradient(135deg, #4a8f4d, #2c5f2d);
-            color: white;
-            border-color: #2c5f2d;
-        }
-
-        .shop-item {
-            background: #f9f9f9;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .shop-item-info {
-            flex: 1;
-        }
-
-        .shop-item-name {
-            font-weight: bold;
-            color: #2c5f2d;
-            margin-bottom: 4px;
-        }
-
-        .shop-item-desc {
-            font-size: 0.85em;
-            color: #666;
-        }
-
-        .buy-btn {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #333;
-            transition: all 0.3s;
-        }
-
-        .buy-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #FFA500, #FF8C00);
-            transform: scale(1.05);
-        }
-
-        .buy-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .owned-count {
-            background: #4a8f4d;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.9em;
-            margin-right: 10px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .action-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .plant-btn {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-        }
-
-        .harvest-btn {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
-            color: white;
-        }
-
-        .action-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .passive-income {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            color: #333;
-            margin-top: 10px;
-        }
-
-        .workers-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .worker-item {
-            background: #e8f5e9;
-            padding: 8px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9em;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s, slideOut 0.3s 2.7s;
-            z-index: 1000;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(400px); }
-            to { transform: translateX(0); }
-        }
-
-        @keyframes slideOut {
-            from { transform: translateX(0); }
-            to { transform: translateX(400px); }
-        }
-
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .plots-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .isometric {
+            transform: rotateX(60deg) rotateZ(-45deg);
         }
     </style>
 </head>
-<body>
-    <div class="game-container">
-        <h1>🚜 Farm Empire 🌾</h1>
-        
-        <div class="stats-bar">
-            <div class="stat">💰 Money: $<span id="money">1000</span></div>
-            <div class="stat">🌾 Total Harvests: <span id="harvests">0</span></div>
-            <div class="stat">💵 Passive Income: $<span id="passive">0</span>/s</div>
+<body class="bg-gradient-to-b from-sky-400 to-sky-200 min-h-screen overflow-x-hidden">
+    
+    <!-- Top HUD -->
+    <div class="fixed top-0 left-0 right-0 bg-gradient-to-r from-green-800 to-green-600 text-white p-4 shadow-2xl z-50">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-6">
+                <div class="text-2xl font-bold">🚜 Farm Empire</div>
+                <div class="bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold text-xl">
+                    💰 $<span id="money">500</span>
+                </div>
+                <div class="bg-blue-500 px-4 py-2 rounded-lg font-semibold">
+                    👷 Workers: <span id="workers">0</span>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="openShop('vehicles')" class="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105">
+                    🚜 Vehicles
+                </button>
+                <button onclick="openShop('animals')" class="bg-pink-500 hover:bg-pink-600 px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105">
+                    🐄 Animals
+                </button>
+                <button onclick="openShop('workers')" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105">
+                    👷 Hire Worker
+                </button>
+                <button onclick="openShop('land')" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105">
+                    🌾 Expand Land
+                </button>
+            </div>
         </div>
+    </div>
 
-        <div class="main-content">
-            <div class="farm-area">
-                <h2 style="color: white; margin-bottom: 15px;">🌱 Your Farm Plots</h2>
-                <div class="plots-grid" id="plots"></div>
-                <div class="action-buttons">
-                    <button class="action-btn plant-btn" id="plantBtn">🌱 Plant Selected Crop</button>
-                    <button class="action-btn harvest-btn" id="harvestBtn">🌾 Harvest All Ready</button>
-                </div>
-            </div>
-
-            <div class="side-panel">
-                <div class="panel-section">
-                    <h2>🌾 Select Crop</h2>
-                    <div class="crop-select" id="cropSelect"></div>
-                </div>
-
-                <div class="panel-section">
-                    <h2>🚜 Vehicles Shop</h2>
-                    <div id="vehiclesShop"></div>
-                </div>
-
-                <div class="panel-section">
-                    <h2>🐄 Animals Shop</h2>
-                    <div id="animalsShop"></div>
-                </div>
-
-                <div class="panel-section">
-                    <h2>👷 Workers</h2>
-                    <div class="workers-list" id="workersList"></div>
-                    <div class="passive-income">
-                        Total Workers: <span id="totalWorkers">0</span>
+    <!-- Main Game Area -->
+    <div class="pt-24 pb-8 px-4">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Farm Grid -->
+            <div id="farmGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Starting plot -->
+                <div class="farm-plot bg-amber-700 rounded-lg p-4 shadow-xl border-4 border-amber-900 relative" data-plot="0">
+                    <div class="bg-amber-600 h-40 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-amber-500 transition-all" onclick="selectCrop(0)">
+                        <div class="text-4xl mb-2">🌱</div>
+                        <div class="text-white font-semibold">Empty Plot</div>
+                        <div class="text-white text-xs mt-1">Click to plant</div>
                     </div>
+                    <div class="plot-info mt-2 text-white text-xs"></div>
                 </div>
             </div>
+
+            <!-- Vehicle Parking Area -->
+            <div class="bg-gray-800 rounded-lg p-6 shadow-2xl mb-8">
+                <h3 class="text-white text-xl font-bold mb-4">🚜 Vehicle Depot</h3>
+                <div id="vehicleDepot" class="grid grid-cols-2 md:grid-cols-4 gap-4 min-h-[100px]">
+                    <div class="text-gray-400 col-span-full text-center py-8">No vehicles purchased yet</div>
+                </div>
+            </div>
+
+            <!-- Animal Barn -->
+            <div class="bg-red-900 rounded-lg p-6 shadow-2xl">
+                <h3 class="text-white text-xl font-bold mb-4">🐄 Animal Barn</h3>
+                <div id="animalBarn" class="grid grid-cols-2 md:grid-cols-4 gap-4 min-h-[100px]">
+                    <div class="text-red-300 col-span-full text-center py-8">No animals purchased yet</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shopModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-r from-green-600 to-green-500 text-white p-6 rounded-t-2xl flex justify-between items-center">
+                <h2 id="shopTitle" class="text-2xl font-bold">Shop</h2>
+                <button onclick="closeShop()" class="text-3xl hover:text-red-300 transition-colors">&times;</button>
+            </div>
+            <div id="shopContent" class="p-6"></div>
+        </div>
+    </div>
+
+    <!-- Crop Selection Modal -->
+    <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full">
+            <div class="bg-gradient-to-r from-green-600 to-green-500 text-white p-6 rounded-t-2xl flex justify-between items-center">
+                <h2 class="text-2xl font-bold">🌾 Select Crop to Plant</h2>
+                <button onclick="closeCropModal()" class="text-3xl hover:text-red-300 transition-colors">&times;</button>
+            </div>
+            <div id="cropContent" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
 
     <script>
         // Game State
-        const game = {
-            money: 1000,
-            selectedCrop: 'wheat',
-            totalHarvests: 0,
-            plots: [],
-            vehicles: {
-                tractor: { count: 0, workers: 0 },
-                combine: { count: 0, workers: 0 },
-                truck: { count: 0, workers: 0 }
-            },
-            animals: {
-                cow: { count: 0, workers: 0 },
-                chicken: { count: 0, workers: 0 },
-                pig: { count: 0, workers: 0 },
-                sheep: { count: 0, workers: 0 }
-            }
+        const gameState = {
+            money: 500,
+            workers: 0,
+            availableWorkers: 0,
+            plots: [{ planted: false, crop: null, planted_time: null, harvestable: false }],
+            vehicles: [],
+            animals: [],
+            currentPlot: null
         };
 
-        // Crop definitions
-        const crops = {
-            wheat: { name: '🌾 Wheat', growTime: 5000, value: 30, icon: '🌾' },
-            corn: { name: '🌽 Corn', growTime: 8000, value: 50, icon: '🌽' },
-            tomato: { name: '🍅 Tomato', growTime: 6000, value: 40, icon: '🍅' },
-            carrot: { name: '🥕 Carrot', growTime: 4000, value: 25, icon: '🥕' },
-            potato: { name: '🥔 Potato', growTime: 7000, value: 45, icon: '🥔' }
-        };
+        // Crop Types
+        const cropTypes = [
+            { name: 'Wheat', icon: '🌾', cost: 10, value: 25, growTime: 5000, color: 'bg-yellow-600' },
+            { name: 'Corn', icon: '🌽', cost: 25, value: 60, growTime: 8000, color: 'bg-yellow-500' },
+            { name: 'Tomatoes', icon: '🍅', cost: 50, value: 130, growTime: 12000, color: 'bg-red-500' },
+            { name: 'Pumpkins', icon: '🎃', cost: 100, value: 280, growTime: 18000, color: 'bg-orange-600' },
+            { name: 'Grapes', icon: '🍇', cost: 200, value: 600, growTime: 25000, color: 'bg-purple-600' }
+        ];
 
-        // Shop items
-        const vehicles = {
-            tractor: { name: 'Tractor', price: 500, income: 5, icon: '🚜' },
-            combine: { name: 'Combine', price: 800, income: 8, icon: '🌾' },
-            truck: { name: 'Truck', price: 600, income: 6, icon: '🚚' }
-        };
+        // Vehicle Types
+        const vehicleTypes = [
+            { name: 'Small Tractor', icon: '🚜', cost: 300, harvestSpeed: 2000, canOperate: ['Wheat', 'Corn'] },
+            { name: 'Medium Tractor', icon: '🚜', cost: 800, harvestSpeed: 1500, canOperate: ['Wheat', 'Corn', 'Tomatoes'] },
+            { name: 'Large Combine', icon: '🚜', cost: 2000, harvestSpeed: 1000, canOperate: ['Wheat', 'Corn', 'Tomatoes', 'Pumpkins'] },
+            { name: 'Harvester Pro', icon: '🚜', cost: 5000, harvestSpeed: 700, canOperate: ['Wheat', 'Corn', 'Tomatoes', 'Pumpkins', 'Grapes'] },
+            { name: 'Mega Combine', icon: '🚜', cost: 12000, harvestSpeed: 400, canOperate: cropTypes.map(c => c.name) }
+        ];
 
-        const animals = {
-            cow: { name: 'Cow', price: 300, income: 3, icon: '🐄' },
-            chicken: { name: 'Chicken', price: 150, income: 2, icon: '🐔' },
-            pig: { name: 'Pig', price: 250, income: 2.5, icon: '🐷' },
-            sheep: { name: 'Sheep', price: 200, income: 2, icon: '🐑' }
-        };
+        // Animal Types
+        const animalTypes = [
+            { name: 'Chickens', icon: '🐔', cost: 100, income: 5, workerNeeded: 1 },
+            { name: 'Pigs', icon: '🐷', cost: 300, income: 15, workerNeeded: 1 },
+            { name: 'Cows', icon: '🐄', cost: 800, income: 40, workerNeeded: 2 },
+            { name: 'Sheep', icon: '🐑', cost: 500, income: 25, workerNeeded: 1 },
+            { name: 'Horses', icon: '🐴', cost: 2000, income: 100, workerNeeded: 2 }
+        ];
 
-        // Initialize plots
-        for (let i = 0; i < 12; i++) {
-            game.plots.push({
-                id: i,
-                crop: null,
-                plantTime: null,
-                progress: 0
-            });
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+            startAnimalIncome();
+        });
+
+        function updateUI() {
+            document.getElementById('money').textContent = gameState.money;
+            document.getElementById('workers').textContent = `${gameState.availableWorkers}/${gameState.workers}`;
         }
 
-        // Render functions
-        function renderPlots() {
-            const plotsContainer = document.getElementById('plots');
-            plotsContainer.innerHTML = '';
+        function selectCrop(plotIndex) {
+            const plot = gameState.plots[plotIndex];
             
-            game.plots.forEach(plot => {
-                const plotDiv = document.createElement('div');
-                plotDiv.className = 'plot';
+            if (plot.harvestable) {
+                harvestPlot(plotIndex);
+                return;
+            }
+            
+            if (plot.planted) {
+                alert('Crop is still growing!');
+                return;
+            }
+
+            gameState.currentPlot = plotIndex;
+            document.getElementById('cropModal').classList.remove('hidden');
+            
+            const content = document.getElementById('cropContent');
+            content.innerHTML = cropTypes.map((crop, idx) => `
+                <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-green-500 transition-all cursor-pointer" onclick="plantCrop(${idx})">
+                    <div class="text-5xl mb-2">${crop.icon}</div>
+                    <div class="font-bold text-lg">${crop.name}</div>
+                    <div class="text-sm text-gray-600">Cost: $${crop.cost}</div>
+                    <div class="text-sm text-gray-600">Sells for: $${crop.value}</div>
+                    <div class="text-sm text-green-600 font-semibold">Profit: $${crop.value - crop.cost}</div>
+                    <div class="text-xs text-gray-500 mt-1">Grows in ${crop.growTime/1000}s</div>
+                </div>
+            `).join('');
+        }
+
+        function plantCrop(cropIndex) {
+            const crop = cropTypes[cropIndex];
+            const plotIndex = gameState.currentPlot;
+            
+            if (gameState.money < crop.cost) {
+                alert('Not enough money!');
+                return;
+            }
+
+            gameState.money -= crop.cost;
+            gameState.plots[plotIndex] = {
+                planted: true,
+                crop: crop,
+                planted_time: Date.now(),
+                harvestable: false
+            };
+
+            updateUI();
+            renderPlots();
+            closeCropModal();
+
+            // Start growing
+            setTimeout(() => {
+                gameState.plots[plotIndex].harvestable = true;
+                renderPlots();
+            }, crop.growTime);
+        }
+
+        function harvestPlot(plotIndex) {
+            const plot = gameState.plots[plotIndex];
+            
+            if (!plot.harvestable) return;
+
+            // Manual harvest
+            gameState.money += plot.crop.value;
+            gameState.plots[plotIndex] = { planted: false, crop: null, planted_time: null, harvestable: false };
+            
+            updateUI();
+            renderPlots();
+            
+            // Show harvest notification
+            showNotification(`+$${plot.crop.value} from ${plot.crop.name}!`);
+        }
+
+        function renderPlots() {
+            const grid = document.getElementById('farmGrid');
+            grid.innerHTML = gameState.plots.map((plot, idx) => {
+                let content = '';
                 
-                if (plot.crop) {
-                    const crop = crops[plot.crop];
-                    const elapsed = Date.now() - plot.plantTime;
-                    const progress = Math.min(100, (elapsed / crop.growTime) * 100);
-                    plot.progress = progress;
-                    
-                    plotDiv.classList.add(progress >= 100 ? 'ready' : 'planted');
-                    
-                    plotDiv.innerHTML = `
-                        <div class="crop-icon">${crop.icon}</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progress}%"></div>
+                if (!plot.planted) {
+                    content = `
+                        <div class="bg-amber-600 h-40 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-amber-500 transition-all" onclick="selectCrop(${idx})">
+                            <div class="text-4xl mb-2">🌱</div>
+                            <div class="text-white font-semibold">Empty Plot</div>
+                            <div class="text-white text-xs mt-1">Click to plant</div>
+                        </div>
+                    `;
+                } else if (plot.harvestable) {
+                    content = `
+                        <div class="${plot.crop.color} h-40 rounded flex flex-col items-center justify-center cursor-pointer hover:brightness-110 transition-all float" onclick="harvestPlot(${idx})">
+                            <div class="text-6xl mb-2">${plot.crop.icon}</div>
+                            <div class="text-white font-bold">Ready to Harvest!</div>
+                            <div class="text-white text-sm">+$${plot.crop.value}</div>
                         </div>
                     `;
                 } else {
-                    plotDiv.classList.add('empty');
-                    plotDiv.innerHTML = '<div style="color: #888; font-size: 0.9em;">Empty</div>';
+                    content = `
+                        <div class="bg-green-700 h-40 rounded flex flex-col items-center justify-center">
+                            <div class="text-4xl mb-2">🌱</div>
+                            <div class="text-white font-semibold">${plot.crop.name} Growing...</div>
+                            <div class="text-white text-xs mt-1">Please wait</div>
+                        </div>
+                    `;
                 }
                 
-                plotDiv.onclick = () => plantOnPlot(plot.id);
-                plotsContainer.appendChild(plotDiv);
-            });
-        }
-
-        function renderCropSelect() {
-            const container = document.getElementById('cropSelect');
-            container.innerHTML = '';
-            
-            Object.keys(crops).forEach(key => {
-                const crop = crops[key];
-                const btn = document.createElement('div');
-                btn.className = 'crop-btn' + (game.selectedCrop === key ? ' selected' : '');
-                btn.innerHTML = `
-                    <div style="font-size: 1.5em;">${crop.icon}</div>
-                    <div style="font-size: 0.85em; margin-top: 4px;">${crop.name.replace(crop.icon + ' ', '')}</div>
-                    <div style="font-size: 0.75em; color: #666;">$${crop.value} • ${crop.growTime/1000}s</div>
-                `;
-                btn.onclick = () => {
-                    game.selectedCrop = key;
-                    renderCropSelect();
-                };
-                container.appendChild(btn);
-            });
-        }
-
-        function renderShop(items, category, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            
-            Object.keys(items).forEach(key => {
-                const item = items[key];
-                const owned = game[category][key];
-                
-                const shopItem = document.createElement('div');
-                shopItem.className = 'shop-item';
-                shopItem.innerHTML = `
-                    <div class="shop-item-info">
-                        <div class="shop-item-name">${item.icon} ${item.name}</div>
-                        <div class="shop-item-desc">$${item.price} • +$${item.income}/s</div>
+                return `
+                    <div class="farm-plot bg-amber-700 rounded-lg p-4 shadow-xl border-4 border-amber-900 relative" data-plot="${idx}">
+                        ${content}
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <span class="owned-count">×${owned.count}</span>
-                        <button class="buy-btn" onclick="buyItem('${category}', '${key}')" 
-                                ${game.money < item.price ? 'disabled' : ''}>
-                            Buy
+                `;
+            }).join('');
+        }
+
+        function openShop(type) {
+            document.getElementById('shopModal').classList.remove('hidden');
+            
+            const titles = {
+                vehicles: '🚜 Buy Vehicles',
+                animals: '🐄 Buy Animals',
+                workers: '👷 Hire Workers',
+                land: '🌾 Expand Farmland'
+            };
+            
+            document.getElementById('shopTitle').textContent = titles[type];
+            const content = document.getElementById('shopContent');
+            
+            if (type === 'vehicles') {
+                content.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${vehicleTypes.map((vehicle, idx) => `
+                            <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-green-500 transition-all">
+                                <div class="text-4xl mb-2">${vehicle.icon}</div>
+                                <div class="font-bold text-lg">${vehicle.name}</div>
+                                <div class="text-sm text-gray-600 mb-2">Cost: $${vehicle.cost}</div>
+                                <div class="text-xs text-gray-500 mb-2">Harvests: ${vehicle.canOperate.join(', ')}</div>
+                                <button onclick="buyVehicle(${idx})" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all">
+                                    Purchase
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (type === 'animals') {
+                content.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${animalTypes.map((animal, idx) => `
+                            <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-green-500 transition-all">
+                                <div class="text-4xl mb-2">${animal.icon}</div>
+                                <div class="font-bold text-lg">${animal.name}</div>
+                                <div class="text-sm text-gray-600">Cost: $${animal.cost}</div>
+                                <div class="text-sm text-green-600">Income: $${animal.income}/5s</div>
+                                <div class="text-sm text-blue-600 mb-2">Needs ${animal.workerNeeded} worker(s)</div>
+                                <button onclick="buyAnimal(${idx})" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-all">
+                                    Purchase
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (type === 'workers') {
+                content.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">👷</div>
+                        <div class="text-2xl font-bold mb-2">Hire a Farm Worker</div>
+                        <div class="text-gray-600 mb-4">Cost: $100 per worker</div>
+                        <div class="text-lg mb-6">
+                            Current: ${gameState.availableWorkers} available / ${gameState.workers} total<br>
+                            <span class="text-sm text-gray-500">Assign workers to animals for passive income</span>
+                        </div>
+                        <button onclick="hireWorker()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-bold text-xl transition-all">
+                            Hire Worker - $100
                         </button>
                     </div>
                 `;
-                container.appendChild(shopItem);
-            });
-        }
-
-        function renderWorkers() {
-            const container = document.getElementById('workersList');
-            container.innerHTML = '';
-            
-            let totalWorkers = 0;
-            
-            // Vehicle workers
-            Object.keys(game.vehicles).forEach(key => {
-                const vehicle = game.vehicles[key];
-                if (vehicle.count > 0) {
-                    const workerDiv = document.createElement('div');
-                    workerDiv.className = 'worker-item';
-                    workerDiv.innerHTML = `
-                        <span>${vehicles[key].icon} ${vehicles[key].name} Workers</span>
-                        <span>${vehicle.workers}/${vehicle.count}</span>
-                    `;
-                    container.appendChild(workerDiv);
-                    totalWorkers += vehicle.workers;
-                }
-            });
-            
-            // Animal workers
-            Object.keys(game.animals).forEach(key => {
-                const animal = game.animals[key];
-                if (animal.count > 0) {
-                    const workerDiv = document.createElement('div');
-                    workerDiv.className = 'worker-item';
-                    workerDiv.innerHTML = `
-                        <span>${animals[key].icon} ${animals[key].name} Caretakers</span>
-                        <span>${animal.workers}/${animal.count}</span>
-                    `;
-                    container.appendChild(workerDiv);
-                    totalWorkers += animal.workers;
-                }
-            });
-            
-            if (totalWorkers === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No workers yet. Buy vehicles and animals to hire workers!</div>';
-            }
-            
-            document.getElementById('totalWorkers').textContent = totalWorkers;
-        }
-
-        function renderStats() {
-            document.getElementById('money').textContent = Math.floor(game.money);
-            document.getElementById('harvests').textContent = game.totalHarvests;
-            document.getElementById('passive').textContent = calculatePassiveIncome().toFixed(1);
-        }
-
-        // Game actions
-        function plantOnPlot(plotId) {
-            const plot = game.plots[plotId];
-            if (!plot.crop) {
-                plot.crop = game.selectedCrop;
-                plot.plantTime = Date.now();
-                plot.progress = 0;
-                showNotification(`Planted ${crops[game.selectedCrop].name}!`);
-                renderPlots();
+            } else if (type === 'land') {
+                content.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🌾</div>
+                        <div class="text-2xl font-bold mb-2">Expand Your Farm</div>
+                        <div class="text-gray-600 mb-4">Cost: $${500 * gameState.plots.length}</div>
+                        <div class="text-lg mb-6">Current plots: ${gameState.plots.length}</div>
+                        <button onclick="buyLand()" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold text-xl transition-all">
+                            Buy New Plot - $${500 * gameState.plots.length}
+                        </button>
+                    </div>
+                `;
             }
         }
 
-        function plantAll() {
-            let planted = 0;
-            game.plots.forEach(plot => {
-                if (!plot.crop) {
-                    plot.crop = game.selectedCrop;
-                    plot.plantTime = Date.now();
-                    plot.progress = 0;
-                    planted++;
-                }
-            });
-            if (planted > 0) {
-                showNotification(`Planted ${planted} ${crops[game.selectedCrop].name} plots!`);
-                renderPlots();
-            }
+        function closeShop() {
+            document.getElementById('shopModal').classList.add('hidden');
         }
 
-        function harvestAll() {
-            let harvested = 0;
-            let earnings = 0;
-            
-            game.plots.forEach(plot => {
-                if (plot.crop && plot.progress >= 100) {
-                    const crop = crops[plot.crop];
-                    earnings += crop.value;
-                    plot.crop = null;
-                    plot.plantTime = null;
-                    plot.progress = 0;
-                    harvested++;
-                }
-            });
-            
-            if (harvested > 0) {
-                game.money += earnings;
-                game.totalHarvests += harvested;
-                showNotification(`Harvested ${harvested} crops for $${earnings}!`);
-                renderPlots();
-                renderStats();
-            }
+        function closeCropModal() {
+            document.getElementById('cropModal').classList.add('hidden');
         }
 
-        function buyItem(category, key) {
-            const items = category === 'vehicles' ? vehicles : animals;
-            const item = items[key];
+        function buyVehicle(vehicleIndex) {
+            const vehicle = vehicleTypes[vehicleIndex];
             
-            if (game.money >= item.price) {
-                game.money -= item.price;
-                game[category][key].count++;
+            if (gameState.money < vehicle.cost) {
+                alert('Not enough money!');
+                return;
+            }
+
+            gameState.money -= vehicle.cost;
+            gameState.vehicles.push({
+                type: vehicle,
+                worker: null,
+                playerLocked: false,
+                id: Date.now()
+            });
+
+            updateUI();
+            renderVehicles();
+            showNotification(`${vehicle.name} purchased!`);
+        }
+
+        function buyAnimal(animalIndex) {
+            const animal = animalTypes[animalIndex];
+            
+            if (gameState.money < animal.cost) {
+                alert('Not enough money!');
+                return;
+            }
+
+            gameState.money -= animal.cost;
+            gameState.animals.push({
+                type: animal,
+                workers: [],
+                id: Date.now()
+            });
+
+            updateUI();
+            renderAnimals();
+            showNotification(`${animal.name} purchased!`);
+        }
+
+        function hireWorker() {
+            if (gameState.money < 100) {
+                alert('Not enough money!');
+                return;
+            }
+
+            gameState.money -= 100;
+            gameState.workers++;
+            gameState.availableWorkers++;
+
+            updateUI();
+            showNotification('Worker hired!');
+        }
+
+        function buyLand() {
+            const cost = 500 * gameState.plots.length;
+            
+            if (gameState.money < cost) {
+                alert('Not enough money!');
+                return;
+            }
+
+            gameState.money -= cost;
+            gameState.plots.push({ planted: false, crop: null, planted_time: null, harvestable: false });
+
+            updateUI();
+            renderPlots();
+            showNotification('New plot purchased!');
+        }
+
+        function renderVehicles() {
+            const depot = document.getElementById('vehicleDepot');
+            
+            if (gameState.vehicles.length === 0) {
+                depot.innerHTML = '<div class="text-gray-400 col-span-full text-center py-8">No vehicles purchased yet</div>';
+                return;
+            }
+
+            depot.innerHTML = gameState.vehicles.map((vehicle, idx) => `
+                <div class="bg-gray-700 rounded-lg p-4 border-2 ${vehicle.playerLocked ? 'border-yellow-500' : 'border-gray-600'}">
+                    <div class="text-4xl mb-2">${vehicle.type.icon}</div>
+                    <div class="text-white font-semibold text-sm mb-2">${vehicle.type.name}</div>
+                    <div class="text-xs text-gray-300 mb-2">
+                        ${vehicle.worker ? '👷 Worker assigned' : vehicle.playerLocked ? '🔒 Player only' : '⭕ Unassigned'}
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        ${vehicle.playerLocked ? `
+                            <button onclick="unlockVehicle(${idx})" class="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded text-xs">
+                                Unlock
+                            </button>
+                        ` : `
+                            <button onclick="lockVehicle(${idx})" class="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded text-xs">
+                                Lock for Me
+                            </button>
+                        `}
+                        ${!vehicle.playerLocked && !vehicle.worker && gameState.availableWorkers > 0 ? `
+                            <button onclick="assignWorkerToVehicle(${idx})" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">
+                                Assign Worker
+                            </button>
+                        ` : ''}
+                        ${!vehicle.playerLocked && vehicle.worker ? `
+                            <button onclick="removeWorkerFromVehicle(${idx})" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs">
+                                Remove Worker
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAnimals() {
+            const barn = document.getElementById('animalBarn');
+            
+            if (gameState.animals.length === 0) {
+                barn.innerHTML = '<div class="text-red-300 col-span-full text-center py-8">No animals purchased yet</div>';
+                return;
+            }
+
+            barn.innerHTML = gameState.animals.map((animal, idx) => `
+                <div class="bg-red-800 rounded-lg p-4 border-2 border-red-600">
+                    <div class="text-4xl mb-2">${animal.type.icon}</div>
+                    <div class="text-white font-semibold text-sm mb-2">${animal.type.name}</div>
+                    <div class="text-xs text-red-200 mb-2">
+                        Workers: ${animal.workers.length}/${animal.type.workerNeeded}
+                    </div>
+                    <div class="text-xs text-green-300 mb-2">
+                        Income: $${animal.type.income * (animal.workers.length / animal.type.workerNeeded)}/5s
+                    </div>
+                    ${animal.workers.length < animal.type.workerNeeded && gameState.availableWorkers > 0 ? `
+                        <button onclick="assignWorkerToAnimal(${idx})" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">
+                            Assign Worker
+                        </button>
+                    ` : ''}
+                    ${animal.workers.length > 0 ? `
+                        <button onclick="removeWorkerFromAnimal(${idx})" class="w-full bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs mt-1">
+                            Remove Worker
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function lockVehicle(idx) {
+            gameState.vehicles[idx].playerLocked = true;
+            renderVehicles();
+            showNotification('Vehicle locked for player use!');
+        }
+
+        function unlockVehicle(idx) {
+            gameState.vehicles[idx].playerLocked = false;
+            renderVehicles();
+            showNotification('Vehicle unlocked!');
+        }
+
+        function assignWorkerToVehicle(idx) {
+            if (gameState.availableWorkers <= 0) {
+                alert('No available workers!');
+                return;
+            }
+
+            gameState.vehicles[idx].worker = true;
+            gameState.availableWorkers--;
+            updateUI();
+            renderVehicles();
+            showNotification('Worker assigned to vehicle!');
+        }
+
+        function removeWorkerFromVehicle(idx) {
+            gameState.vehicles[idx].worker = null;
+            gameState.availableWorkers++;
+            updateUI();
+            renderVehicles();
+            showNotification('Worker removed from vehicle!');
+        }
+
+        function assignWorkerToAnimal(idx) {
+            const animal = gameState.animals[idx];
+            
+            if (gameState.availableWorkers <= 0) {
+                alert('No available workers!');
+                return;
+            }
+
+            if (animal.workers.length >= animal.type.workerNeeded) {
+                alert('This animal already has enough workers!');
+                return;
+            }
+
+            animal.workers.push(true);
+            gameState.availableWorkers--;
+            updateUI();
+            renderAnimals();
+            showNotification('Worker assigned to animal!');
+        }
+
+        function removeWorkerFromAnimal(idx) {
+            const animal = gameState.animals[idx];
+            
+            if (animal.workers.length === 0) return;
+
+            animal.workers.pop();
+            gameState.availableWorkers++;
+            updateUI();
+            renderAnimals();
+            showNotification('Worker removed from animal!');
+        }
+
+        function startAnimalIncome() {
+            setInterval(() => {
+                let totalIncome = 0;
                 
-                // Auto-hire worker
-                if (game[category][key].workers < game[category][key].count) {
-                    game[category][key].workers++;
+                gameState.animals.forEach(animal => {
+                    const efficiency = animal.workers.length / animal.type.workerNeeded;
+                    const income = animal.type.income * efficiency;
+                    totalIncome += income;
+                });
+
+                if (totalIncome > 0) {
+                    gameState.money += totalIncome;
+                    updateUI();
+                    showNotification(`+$${totalIncome.toFixed(1)} from animals!`, 'bg-green-500');
                 }
-                
-                showNotification(`Bought ${item.name} for $${item.price}!`);
-                renderShop(items, category, category + 'Shop');
-                renderWorkers();
-                renderStats();
-            }
+            }, 5000);
         }
 
-        function calculatePassiveIncome() {
-            let income = 0;
-            
-            // Vehicle income
-            Object.keys(game.vehicles).forEach(key => {
-                const vehicle = game.vehicles[key];
-                income += vehicle.workers * vehicles[key].income;
-            });
-            
-            // Animal income
-            Object.keys(game.animals).forEach(key => {
-                const animal = game.animals[key];
-                income += animal.workers * animals[key].income;
-            });
-            
-            return income;
-        }
-
-        function showNotification(message) {
+        function showNotification(message, bgClass = 'bg-green-600') {
             const notification = document.createElement('div');
-            notification.className = 'notification';
+            notification.className = `fixed top-24 right-4 ${bgClass} text-white px-6 py-3 rounded-lg shadow-2xl font-bold z-50 transition-all`;
             notification.textContent = message;
             document.body.appendChild(notification);
-            
+
             setTimeout(() => {
-                notification.remove();
-            }, 3000);
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
         }
 
-        // Game loop
-        setInterval(() => {
-            renderPlots();
-        }, 100);
-
-        setInterval(() => {
-            const income = calculatePassiveIncome();
-            game.money += income;
-            renderStats();
-        }, 1000);
-
-        // Event listeners
-        document.getElementById('plantBtn').onclick = plantAll;
-        document.getElementById('harvestBtn').onclick = harvestAll;
-
-        // Initialize game
+        // Initial render
         renderPlots();
-        renderCropSelect();
-        renderShop(vehicles, 'vehicles', 'vehiclesShop');
-        renderShop(animals, 'animals', 'animalsShop');
-        renderWorkers();
-        renderStats();
+        renderVehicles();
+        renderAnimals();
     </script>
+
+<script>window.onload=function(){var d=document.createElement("div");d.id="appLoadFinished";document.body.appendChild(d);};</script>
 </body>
+
 </html>
